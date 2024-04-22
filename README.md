@@ -1,5 +1,5 @@
 ### Projeto de Assembly x86_64 para Operações com Ponto Flutuante
-* Este projeto foi desenvolvido como parte de uma atividade acadêmica na Universidade Estadual do Oeste do Paraná (UNIOESTE) pelos acadêmicos Eric Klaus Brenner Melo e Santos e Ruan Rubino.
+* Este projeto foi desenvolvido como parte de uma atividade acadêmica na Universidade Estadual do Oeste do Paraná (UNIOESTE) pelos acadêmicos Eric Klaus Brenner Melo e Santos e Ruan Rubino de Carvalho.
 
 #### Descrição
 * O objetivo deste projeto é criar um programa em Assembly x86_64 que permita a entrada de dois operandos sinalizados em ponto-flutuante de precisão simples e uma operação aritmética. O programa calculará o resultado da operação e o armazenará em um arquivo acumulativo.
