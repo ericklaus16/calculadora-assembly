@@ -7,14 +7,14 @@
 #### Especificações
 * Arquitetura: AMD/Intel x86_64
 * Sintaxe: Intel
-* Operações: Adição, Subtração, Multiplicação, Divisão
+* Operações: Adição, Subtração, Multiplicação, Divisão e Exponenciação
 * Entradas: Dois operandos e operador
-* Saída: Resultado da operação
+* Saída: Resultado da operação em um arquivo resultado.txt
 
 #### Funcionamento
 
 ##### Entrada de Operandos e Operação:
-* O programa solicitará a entrada dos dois operandos em ponto-flutuante de precisão simples e a operação desejada (+, -, *, /) através de chamadas de sistema (syscall).
+* O programa solicitará a entrada dos dois operandos em ponto-flutuante de precisão simples e a operação desejada (a, s, m, d, e) através de funções externas scanf.
 
 ##### Cálculo da Operação:
 * Com base nos operandos e na operação, o programa executará a operação aritmética correspondente em ponto-flutuante.
@@ -27,7 +27,7 @@
 
 ##### Como Executar
 * Montagem e Ligação: nasm -f elf64 calculadora.asm; gcc -m64 -no-pie calculadora.o -o calculadora.x
-* Execução: ./calculadora.x operando1 operacao operando2
+* Execução: ./calculadora.x
 
 ##### Observações
 * Casos não cobertos neste documento foram decididos pelos acadêmicos durante o desenvolvimento do projeto.
