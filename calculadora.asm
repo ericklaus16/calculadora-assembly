@@ -13,6 +13,8 @@ section .data
 	nomeArquivo : db "resultado.txt", 0
 	modoLeituraArquivo : db "a", 0
 	strControleArquivo : db "%lf %c %lf = %lf", 10, 0
+	strControleArquivoNotOk : db "%lf %c %lf = funcionalidade não disponível", 10, 0
+	valorZerado: db 0
 
 section .bss
 	operando1 : resd 1
@@ -46,39 +48,64 @@ main:
 	; xmm1 = operando2
 	; xmm2 = resultado
 
-	mov r8, [operacao]
+	xor r8, r8
+	mov r8b, [operacao]
+	
+	cmp r8b, 'a'
+	je chamarSoma
+	cmp r8b, 's'
+	je chamarSubtracao
+	cmp r8b, 'm'
+	je chamarMultiplicacao
+	cmp r8b, 'd'
+	je chamarDivisao
+	cmp r8b, 'e'
+	je chamarExponenciacao
+	
+	mov [operacaoArquivoSaida], r8b
+	jmp escrevesolucaoNOTOK
 
-	cmp r8, 'a'
-	movss xmm0, [operando1]
-	movss xmm1, [operando2]
-	call soma
-	jmp modificaArquivo
+	chamarSoma:
+		movss xmm0, [operando1]
+		movss xmm1, [operando2]
+		call soma
+		jmp escrevesolucaoOK
 
-	cmp r8, 's'
-	movss xmm0, [operando1]
-        movss xmm1, [operando2]
-	call subtracao
-	jmp modificaArquivo
+	chamarSubtracao:
+		movss xmm0, [operando1]
+       		movss xmm1, [operando2]
+		call subtracao
+		jmp escrevesolucaoOK
 
-	cmp r8, 'm'
-	movss xmm0, [operando1]
-        movss xmm1, [operando2]
-	call multiplicacao
-	jmp modificaArquivo
+	chamarMultiplicacao:
+		movss xmm0, [operando1]
+        	movss xmm1, [operando2]
+		call multiplicacao
+		jmp escrevesolucaoOK
 
-	cmp r8, 'd'
-	movss xmm0, [operando1]
-        movss xmm1, [operando2]	
-	call divisao
-	jmp modificaArquivo
+	chamarDivisao:
+        	mov r9b, "/"
+        	mov [operacaoArquivoSaida], r9b
+		movss xmm0, [operando1]
+        	movss xmm1, [operando2]
+		comiss xmm1, [valorZerado]
+		je escrevesolucaoNOTOK
+		call divisao
+		jmp escrevesolucaoOK
 
-	cmp r8, 'e'
-	movss xmm0, [operando1]
-        movss xmm1, [operando2]
-	call exponenciacao
-	jmp modificaArquivo
+	chamarExponenciacao:
+		mov r9b, "^"
+        	mov [operacaoArquivoSaida], r9b
 
-modificaArquivo:
+		movss xmm0, [operando1]
+        	movss xmm1, [operando2]
+		comiss xmm1, [valorZerado]
+		jb escrevesolucaoNOTOK
+		call exponenciacao
+		jmp escrevesolucaoOK
+
+
+escrevesolucaoOK:
 	movss [resultado], xmm2
 	xor rax, rax
 	mov rdi, nomeArquivo
@@ -97,6 +124,26 @@ modificaArquivo:
 
 	mov rdi, qword [arquivo]
 	call fclose
+	jmp fim
+
+escrevesolucaoNOTOK:
+        movss [resultado], xmm2
+        xor rax, rax
+        mov rdi, nomeArquivo
+        mov rsi, modoLeituraArquivo
+        call fopen
+        mov [arquivo], rax ; o resultado de fopen está em rax
+
+        mov rax, 2
+        mov rdi, qword [arquivo]
+        mov rsi, strControleArquivoNotOk
+        cvtss2sd xmm0, [operando1]
+        mov rdx, [operacaoArquivoSaida]
+        cvtss2sd xmm1, [operando2]
+        call fprintf
+
+        mov rdi, qword [arquivo]
+        call fclose
 	
 fim:
 	mov rsp, rbp
@@ -126,6 +173,8 @@ subtracao:
 	mov r9b, "-"
 	mov [operacaoArquivoSaida], r9b
         
+	vsubss xmm2, xmm0, xmm1
+
 	mov rsp, rbp
         pop rbp
         ret
@@ -137,6 +186,8 @@ multiplicacao:
 	mov r9b, "*"
 	mov [operacaoArquivoSaida], r9b
 
+	vmulss xmm2, xmm0, xmm1
+
         mov rsp, rbp
         pop rbp
         ret
@@ -144,9 +195,8 @@ multiplicacao:
 divisao:
         push rbp
         mov rbp, rsp
-
-	mov r9b, "/"
-	mov [operacaoArquivoSaida], r9b
+	
+	vdivss xmm2, xmm0, xmm1
 
         mov rsp, rbp
         pop rbp
@@ -155,10 +205,19 @@ divisao:
 exponenciacao:
         push rbp
         mov rbp, rsp
+		
+	movss xmm3, xmm0
+	cvtss2si r11, xmm1	
 
-	mov r9b, "^"
-	mov [operacaoArquivoSaida], r9b
-
+	mov r10b, 1
+	_loop:
+		mulss xmm0, xmm3
+		inc r10
+		cmp r10, r11
+		jne _loop
+	
+	movss xmm2, xmm0
+	
         mov rsp, rbp
         pop rbp
         ret
